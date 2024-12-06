@@ -1,6 +1,8 @@
 import os
 from collections import defaultdict
 
+# Topological sort may be relevant if there's a harder version of todays problem
+
 def get_input(name="input.dat"):
     current_directory = os.path.dirname(os.path.realpath(__file__))
     input_file_path = os.path.join(current_directory, name)
