@@ -20,7 +20,7 @@ def main():
     input_file = get_input()
     
     total = 0
-    for i, line in enumerate(input_file):
+    for line in input_file:
         answer, nums = line.split(": ")
         nums = [int(num) for num in nums.split(" ")]
         answer = int(answer)
