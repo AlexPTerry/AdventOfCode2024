@@ -30,35 +30,50 @@ def box_move_vert(box, direction, boxes, walls, moving_boxes):
     target = box + direction
     for offset in (-1, 0, 1):
         if target + offset in walls:
+            moving_boxes[box] = False
             return False
         
     for offset in (-1, 0, 1):
-        if target in walls:
-            return False
         if target + offset in boxes:
-            if not box_move_vert(target + offset, direction, boxes, walls, moving_boxes):
+            if not moving_boxes.get(target + offset, True):
+                moving_boxes[box] = False
                 return False
-    moving_boxes.add(box)
+            elif not box_move_vert(target + offset, direction, boxes, walls, moving_boxes):
+                moving_boxes[box] = False
+                return False
+    moving_boxes[box] = True
     return True
 
 def box_move_left(box, boxes, walls, moving_boxes):
     target = box - 2
     if target in walls:
+        moving_boxes[box] = False
         return False
-    if target in boxes:
-        if not box_move_left(target, boxes, walls, moving_boxes):
+    elif target in boxes:
+        if target in moving_boxes:
+            moving_boxes[box] = moving_boxes[target]
+            return moving_boxes[box]
+        elif not box_move_left(target, boxes, walls, moving_boxes):
+            moving_boxes[box] = False
             return False
-    moving_boxes.add(box)
+    
+    moving_boxes[box] = True
     return True
 
 def box_move_right(box, boxes, walls, moving_boxes):
     target = box + 2
     if target in walls:
+        moving_boxes[box] = False
         return False
-    if target in boxes:
-        if not box_move_right(target, boxes, walls, moving_boxes):
+    elif target in boxes:
+        if target in moving_boxes:
+            moving_boxes[box] = moving_boxes[target]
+            return moving_boxes[box]
+        elif not box_move_right(target, boxes, walls, moving_boxes):
+            moving_boxes[box] = False
             return False
-    moving_boxes.add(box)
+    
+    moving_boxes[box] = True
     return True
 
 def move(current_pos, direction, walls, boxes):
@@ -68,18 +83,18 @@ def move(current_pos, direction, walls, boxes):
         if target in walls or alt_target in walls:
             return current_pos, boxes
         if target in boxes:
-            moving_boxes = set()
+            moving_boxes = {}
             if box_move_vert(target, direction, boxes, walls, moving_boxes):
                 new_boxes = set(box + direction for box in moving_boxes)
-                boxes = boxes - moving_boxes
+                boxes = boxes - set(key for key, item in moving_boxes.items() if item)
                 boxes.update(new_boxes)
                 return target, boxes
             return current_pos, boxes
         if alt_target in boxes:
-            moving_boxes = set()
+            moving_boxes = {}
             if box_move_vert(alt_target, direction, boxes, walls, moving_boxes):
                 new_boxes = set(box + direction for box in moving_boxes)
-                boxes = boxes - moving_boxes
+                boxes = boxes - set(key for key, item in moving_boxes.items() if item)
                 boxes.update(new_boxes)
                 return target, boxes
             return current_pos, boxes
@@ -88,10 +103,10 @@ def move(current_pos, direction, walls, boxes):
         if target in walls:
             return current_pos, boxes
         if target in boxes:
-            moving_boxes = set()
+            moving_boxes = {}
             if box_move_right(target, boxes, walls, moving_boxes):
                 new_boxes = set(box + direction for box in moving_boxes)
-                boxes = boxes - moving_boxes
+                boxes = boxes - set(key for key, item in moving_boxes.items() if item)
                 boxes.update(new_boxes)
                 return target, boxes
             return current_pos, boxes
@@ -100,10 +115,10 @@ def move(current_pos, direction, walls, boxes):
         if target in walls:
             return current_pos, boxes
         if target in boxes:
-            moving_boxes = set()
+            moving_boxes = {}
             if box_move_left(target, boxes, walls, moving_boxes):
                 new_boxes = set(box + direction for box in moving_boxes)
-                boxes = boxes - moving_boxes
+                boxes = boxes - set(key for key, item in moving_boxes.items() if item)
                 boxes.update(new_boxes)
                 return current_pos - 1, boxes
             return current_pos, boxes
@@ -127,7 +142,6 @@ def main():
     for box in boxes:
         total += int(box.real + 100*box.imag)
     print(total)
-
 
 if __name__ == "__main__":
     main()
